@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ -x /usr/local/bin/docco ];
+then
+  BASEDIR=$(dirname $0)
+  docco $BASEDIR/../lib/*.js
+else
+  echo "Didn't see docco in /usr/local/bin; try npm install docco if you have nodejs"
+fi

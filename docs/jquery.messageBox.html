@@ -1,0 +1,125 @@
+<!DOCTYPE html>  <html> <head>   <title>jquery.messageBox.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               jquery.messageBox.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-1">#</a>               </div>               <p>jQuery-style messenger, for triggering notifications programmatically via javascript.
+this is designed to be extendible: I'd like to be able to trigger pushdowns &amp; flash-messages.</p>
+
+<p>Requires: jquery closure plugin (very small): <a href="http://code.abnoctus.com/jclosure/doc/">code here</a></p>
+
+<p>Setting up the Display:</p>
+
+<pre><code> jQuery("#your_message_container").messageBox({
+   messageTypes: [ 'notices', 'alerts' ],  // a list of message types
+   template: my_template_object,           // a template object
+   insertion: {                            // optional
+     method: "prependTo",                  // You might also try "appendTo"
+     fade: 1000                            // choose any length or false
+   }
+ });
+</code></pre>
+
+<p>The template object might be from underscore or somethin'. It needs to be directly callable, so
+if you wanna use Mustache.js for your templates, you'll have to make a curry:</p>
+
+<pre><code> function soupcatcher(template) {
+   return function(data) {
+     return Mustache.to_html(template, data);
+   }
+ }
+</code></pre>
+
+<p>then you go:</p>
+
+<pre><code> jQuery(...).messageBox({
+   template: soupcatcher(template),
+   ...
+ });
+</code></pre>
+
+<p>...and all is well.</p>
+
+<h4>Sending Notifications:</h4>
+
+<p>You'll want to use jQuery's custom event mechanism to trigger <code>message:sent</code> events with a custom event object.
+Here's how it should look:</p>
+
+<pre><code> jQuery("#my_message_emitter").trigger({
+   type: "message:sent",
+   messageType: "notice",                  // or whatever
+   messageData: { foo: "bar", quux: 5 }    // ditto
+ });
+</code></pre>
+
+<p>There's a shortcut: <code>jQuery.messenger(message_type, message_data);</code></p>             </td>             <td class="code">               <div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">$</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="kd">function</span> <span class="nx">MessageBox</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">options</span> <span class="o">=</span> <span class="nx">options</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">$element</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nx">MessageBox</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">show</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">$element</span><span class="p">.</span><span class="nx">show</span><span class="p">();</span>
+      <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">template</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-2">#</a>               </div>               <p>use <code>#[pre/app]pendTo</code> so that we can snag a reference to the new message...</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="kd">var</span> <span class="nx">message_element</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">content</span><span class="p">)[</span><span class="k">this</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">insertion</span><span class="p">.</span><span class="nx">method</span><span class="p">](</span><span class="k">this</span><span class="p">.</span><span class="nx">$element</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-3">#</a>               </div>               <p>... in order to hide it after a short delay, if specified:</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">insertion</span><span class="p">.</span><span class="nx">fade</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">insertion</span><span class="p">.</span><span class="nx">fade</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">closeArgs</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">hide</span><span class="p">,</span> <span class="nx">message_element</span><span class="p">),</span> <span class="mi">2000</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="k">return</span> <span class="nx">message</span><span class="p">;</span>
+    <span class="p">},</span>
+    <span class="nx">hide</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">el</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">el</span><span class="p">.</span><span class="nx">fadeOut</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">insertion</span><span class="p">.</span><span class="nx">fade</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">el</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span> <span class="p">});</span>
+    <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-4">#</a>               </div>               <p>indirection to the passed options, for future growth</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">template</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">context</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">template</span><span class="p">(</span><span class="nx">context</span><span class="p">);</span>
+    <span class="p">},</span>
+    <span class="nx">shouldHandleMessage</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message_name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">messageTypes</span> <span class="o">||</span> <span class="p">[]).</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">message_name</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-5">#</a>               </div>               <p>The PubSub channel actually does the event listening. It delegates to registered listeners.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">function</span> <span class="nx">PubSub</span><span class="p">(</span><span class="nx">channel_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">channel</span> <span class="o">=</span> <span class="nx">channel_name</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">listeners</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s2">&quot;message:sent&quot;</span><span class="p">,</span> <span class="nx">$</span><span class="p">.</span><span class="nx">callback</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">receive</span><span class="p">));</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;PubSub&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nx">PubSub</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">publish</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message_name</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">$</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">listeners</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">message_box</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span> <span class="nx">message_box</span><span class="p">.</span><span class="nx">shouldHandleMessage</span><span class="p">(</span><span class="nx">message_name</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="nx">message_box</span><span class="p">.</span><span class="nx">show</span><span class="p">(</span> <span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;messageType&quot;</span><span class="o">:</span> <span class="nx">message_name</span> <span class="p">})</span> <span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">});</span>
+    <span class="p">},</span>
+    <span class="nx">receive</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">publish</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">messageType</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">messageData</span><span class="p">);</span>
+    <span class="p">},</span>
+    <span class="nx">add_listener</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">listener</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">listeners</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span> <span class="nx">listener</span> <span class="p">);</span>
+      <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-6">#</a>               </div>               <p>setup a new PubSub, if necessary, and
+setup a new MessageBox and register it with the PubSub Dispatcher</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">$</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">messageBox</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">options</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">$</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">messageBox</span><span class="p">.</span><span class="nx">defaults</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">pub_sub</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s2">&quot;PubSub&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span> <span class="o">!</span><span class="nx">pub_sub</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">pub_sub</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PubSub</span><span class="p">(</span><span class="s2">&quot;message_box&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">message_box</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MessageBox</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+    <span class="nx">pub_sub</span><span class="p">.</span><span class="nx">add_listener</span><span class="p">(</span> <span class="nx">message_box</span> <span class="p">);</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="nx">$</span><span class="p">.</span><span class="nx">messenger</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message_type</span><span class="p">,</span> <span class="nx">message_data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">trigger</span><span class="p">({</span>
+      <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;message:sent&quot;</span><span class="p">,</span>
+      <span class="nx">messageType</span><span class="o">:</span> <span class="nx">message_type</span><span class="p">,</span>
+      <span class="nx">messageData</span><span class="o">:</span> <span class="nx">message_data</span>
+    <span class="p">});</span>
+  <span class="p">};</span>
+
+  <span class="nx">$</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">messageBox</span><span class="p">.</span><span class="nx">defaults</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">insertion</span><span class="o">:</span> <span class="p">{</span>
+      <span class="nx">method</span><span class="o">:</span> <span class="s2">&quot;prependTo&quot;</span><span class="p">,</span>  <span class="c1">// You might also try &quot;appendTo&quot;</span>
+      <span class="nx">fade</span><span class="o">:</span> <span class="mi">1000</span>            <span class="c1">// You can choose any length or false</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+<span class="p">})(</span><span class="nx">jQuery</span><span class="p">);</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
