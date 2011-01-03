@@ -11,14 +11,17 @@
   <link rel="stylesheet" href="styles.css" type="text/css" media="screen">
 
 <script>
-// the message boxes themselves:
 jQuery(function() {
+  jQuery("#the_codez").hide();
+
+  // a mustache template wrapper
   function soupcatcher(template) {
     return function(data) {
       return Mustache.to_html(template, data);
     }
   }
 
+  // the message boxes themselves:
   jQuery("#footer_messages").messageBox({
     messageTypes: [ 'debug', 'info', 'warn', 'error' ],
     template: soupcatcher("<li>Heyaz, I got a message-type thingy: {{messageType}}. It had a number, too: {{a_number}}</li>"),
@@ -37,6 +40,11 @@ jQuery(".button").live("click", function(e) {
     messageType: this.id,
     messageData: { a_number: Math.round(Math.random() * 100) }
   });
+  return false;
+});
+
+jQuery("#the_codez_revealer").live("click", function() {
+  jQuery("#the_codez").toggle();
   return false;
 });
 </script>
@@ -62,6 +70,29 @@ jQuery(".button").live("click", function(e) {
       <a href="#" id="warn" class="button notice">Warn!</a>
       <a href="#" id="error" class="button negative">Error!</a>
     </div>
+
+    <p>The necessary code to handle all this is pretty simple: <a href="#" id="the_codez_revealer">Show me</a></p>
+
+<pre id="the_codez"><code>jQuery(function() {
+  // a mustache template wrapper
+  function soupcatcher(template) {
+    return function(data) {
+      return Mustache.to_html(template, data);
+    }
+  }
+
+  // the message boxes themselves:
+  jQuery("#footer_messages").messageBox({
+    messageTypes: [ 'debug', 'info', 'warn', 'error' ],
+    template: soupcatcher(&quot;&lt;li&gt;Heyaz, I got a message-type thingy: {{messageType}}. It had a number, too: {{a_number}}&lt;/li&gt;&quot;),
+  });
+  jQuery("#mfd_messages").messageBox({
+    messageTypes: [ 'warn', 'error' ],
+    template: _.template("&lt;li&gt;Ach, mein &lt;span class=\&quot;negative\&quot;&gt;&lt;%= messageType %&gt;&lt;/span&gt;!" +
+                          "The Magic Number was &lt;span class=\&quot;magic\&quot;&gt;&lt;%= a_number %&gt;&lt;/span&gt;.&lt;/li&gt;")
+  });
+});</code></pre>
+
   </div>
 </div>
 
